@@ -1,0 +1,128 @@
+.hide-until-request{
+    display:none;
+}
+
+
+.container{
+    max-width: 900px;
+}
+
+nav .navbar-brand
+{
+    /* size for brand */
+    font-size: xx-large;
+}
+
+main .form-control
+{
+    /* center form controls */
+    display: inline-block;
+
+    /* override Bootstrap's 100% width for form controls */
+    /* margin: auto;*/
+
+    /* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input */
+}
+
+main
+{
+    /* scroll horizontally as needed */
+    overflow-x: auto;
+
+    /* center contents */
+    text-align: center;
+
+    font-family:'Roboto', sans-serif;
+
+}
+
+
+main img
+{
+    /* constrain images on small screens */
+    max-width: 100%;
+}
+/*bun lettuce tomato mayo cheese patty */
+/* redonion lettuce tomate mayo cheese patty */
+
+.card-header0
+{
+/* bun */
+    background-color: #FAC158;
+}
+
+.card-header1, .card-header7
+{
+    /* lettuce */
+    background-color:#01C201;
+}
+
+.card-header2, .card-header8
+{
+    /* tomato */
+    background-color:#FF0000;
+}
+
+.card-header3, .cardheader9
+{
+    /* Sriracha Mayo */
+    background-color:#ff9e4a;
+}
+
+.card-header4, .cardheader10
+{
+    /* Mustard */
+    background-color:#F4CA02;
+}
+
+.card-header5, .cardheader11
+{
+    /* patty */
+    background-color:#804000;
+}
+
+.card-header6
+{
+    /*red onion */
+    background-color:#9d5a8f;
+}
+
+.card-header7
+{
+    /* lettuce */
+    background-color:#01C201;
+}
+.card-header8
+{
+    /* tomato */
+    background-color:#FF0000;
+}
+
+.card-header9
+{
+    /* mayo */
+    background-color:#8C82B7;
+}
+
+.card-header10
+{
+    /* cheese */
+    background-color:#DE7EBB;
+}
+
+.card-header11
+{
+    /* patty */
+    background-color:#B1A8D5;
+}
+
+.card-text
+{
+    text-align: left;
+    padding: .5% 2%;
+}
+
+p
+{
+    padding-bottom: .5%;
+}

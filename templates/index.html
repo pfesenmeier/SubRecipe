@@ -1,0 +1,719 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Main Menu
+{% endblock %}
+
+
+
+{% block main %}
+    <script text=text/javascript>
+        // Send requests to remove a recipe
+        var recipe_card;
+        $(function(){
+            $(".remove-button").bind('click', function(){
+                var recipe_to_remove = $(this).val();
+                recipe_card = $(this);
+                var recipe_collapse_id = `collapse${recipe_to_remove}`;
+                var card_depth = parseInt($(this).closest(".card").attr("id").slice(4), 10);
+                if (card_depth > 0){
+                    var parent_collapse = $(`#${recipe_collapse_id}`).parent().closest(".collapse");
+                    var parent_collapse_id = parent_collapse.attr("id");
+                    var parent_id = parent_collapse_id.slice(8);
+                } else {
+                    parent_id = -1;
+                }
+                var r = confirm("Are you sure you want to remove this recipe from its parent recipe?");
+                if (r){
+                    $.getJSON($SCRIPT_ROOT + '/remove', {
+                        recipe_id: `${recipe_to_remove}`,
+                        parent_id: `${parent_id}`
+                    }, function(data){
+                        if (data.removed){
+                            recipe_card.closest(`.card`).remove();
+                        }
+                    });
+                }
+                return false;
+            });
+        });
+    </script>
+    <div class="container p-0">
+        <div class="row">
+            <div class="col p-0">
+                <div class="accordion" id="accordion0">
+                    {% for subrecipe0 in table %}
+                        <div class="card border-0" id="card0">
+                            <div class="card-header card-header0" id="heading{{ subrecipe0.recipe_id }}">
+                                <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe0.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe0.recipe_id }}">
+                                    <div class="recipe-name h2 m-0">
+                                        {{ subrecipe0.name }}
+                                    </div>
+                                </button>
+                            </div>
+                            <div id="collapse{{ subrecipe0.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe0.recipe_id }}" data-parent="#accordion0">
+                                <div class="card-body p-0 mt-1">
+                                    <div class="card-text">
+                                        <div>
+                                            {% if subrecipe0.ingredients %}
+                                                <ul class="list-group list-group-flush">
+                                                        <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                    {% for ingredient in subrecipe0.ingredients %}
+                                                        <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                            {% if subrecipe0.text %}
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                    <li class="list-group-item">{{ subrecipe0.text }}</li>
+                                                </ul>
+                                            {% endif %}
+                                            <span></span>
+                                        </div>
+                                        <div class="d-flex my-2 ml-3">
+                                            {% if subrecipe0.link %}
+                                                <button class="btn btn-outline-secondary m-1">
+                                                    <a href="//{{ subrecipe0.link }}" rel="external">Web</a>
+                                                </button>
+                                            {% endif %}
+                                            <form action="/add" method="get">
+                                                <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe0.recipe_id }}"  type="submit">
+                                                    Add
+                                                </button>
+                                            </form>
+                                            <form action="/update" method="get">
+                                                <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe0.recipe_id }}" type="submit">
+                                                    Update
+                                                </button>
+                                            </form>
+                                            <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe0.recipe_id }}"  id="remove-button">
+                                                    Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="accordion" id="accordion1">
+                                        {% for subrecipe1 in subrecipe0.children %}
+                                            <div class="card border-0" id="card1">
+                                                <div class="card-header card-header1" id="heading{{ subrecipe1.recipe_id }}">
+                                                        <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe1.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe1.recipe_id }}">
+                                                            <div class="recipe-name h2 m-0">
+                                                                {{ subrecipe1.name }}
+                                                            </div>
+                                                        </button>
+                                                </div>
+                                                <div id="collapse{{ subrecipe1.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe1.recipe_id }}" data-parent="#accordion1">
+                                                    <div class="card-body p-0 mt-1">
+                                                        <div class="card-text">
+                                                            <div>
+                                                                {% if subrecipe1.ingredients %}
+                                                                    <ul class="list-group list-group-flush">
+                                                                            <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                        {% for ingredient in subrecipe1.ingredients %}
+                                                                            <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                {% endif %}
+                                                                {% if subrecipe1.text %}
+                                                                    <ul class="list-group list-group-flush">
+                                                                        <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                        <li class="list-group-item">{{ subrecipe1.text }}</li>
+                                                                    </ul>
+                                                                {% endif %}
+                                                                <span></span>
+                                                            </div>
+                                                            <div class="d-flex my-2 ml-3">
+                                                                {% if subrecipe1.link %}
+                                                                    <button class="btn btn-outline-secondary m-1">
+                                                                        <a href="//{{ subrecipe1.link }}" rel="external">Web</a>
+                                                                    </button>
+                                                                {% endif %}
+                                                                <form action="/add" method="get">
+                                                                    <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe1.recipe_id }}"  type="submit">
+                                                                        Add
+                                                                    </button>
+                                                                </form>
+                                                                <form action="/update" method="get">
+                                                                    <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe1.recipe_id }}" type="submit">
+                                                                        Update
+                                                                    </button>
+                                                                </form>
+                                                                <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe1.recipe_id }}"  id="remove-button">
+                                                                        Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="accordion" id="accordion2">
+                                                            {% for subrecipe2 in subrecipe1.children %}
+                                                                <div class="card border-0" id="card2">
+                                                                    <div class="card-header card-header2" id="heading{{ subrecipe2.recipe_id }}">
+                                                                            <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe2.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe2.recipe_id }}">
+                                                                                <div class="recipe-name h2 m-0">
+                                                                                    {{ subrecipe2.name }}
+                                                                                </div>
+                                                                            </button>
+                                                                    </div>
+                                                                    <div id="collapse{{ subrecipe2.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe2.recipe_id }}" data-parent="#accordion2">
+                                                                        <div class="card-body p-0 mt-1">
+                                                                            <div class="card-text">
+                                                                                <div>
+                                                                                    {% if subrecipe2.ingredients %}
+                                                                                        <ul class="list-group list-group-flush">
+                                                                                                <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                            {% for ingredient in subrecipe2.ingredients %}
+                                                                                                <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                            {% endfor %}
+                                                                                        </ul>
+                                                                                    {% endif %}
+                                                                                    {% if subrecipe2.text %}
+                                                                                        <ul class="list-group list-group-flush">
+                                                                                            <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                            <li class="list-group-item">{{ subrecipe2.text }}</li>
+                                                                                        </ul>
+                                                                                    {% endif %}
+                                                                                    <span></span>
+                                                                                </div>
+                                                                                <div class="d-flex my-2 ml-3">
+                                                                                    {% if subrecipe2.link %}
+                                                                                        <button class="btn btn-outline-secondary m-1">
+                                                                                            <a href="//{{ subrecipe2.link }}" rel="external">Web</a>
+                                                                                        </button>
+                                                                                    {% endif %}
+                                                                                    <form action="/add" method="get">
+                                                                                        <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe2.recipe_id }}"  type="submit">
+                                                                                            Add
+                                                                                        </button>
+                                                                                    </form>
+                                                                                    <form action="/update" method="get">
+                                                                                        <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe2.recipe_id }}" type="submit">
+                                                                                            Update
+                                                                                        </button>
+                                                                                    </form>
+                                                                                    <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe2.recipe_id }}"  id="remove-button">
+                                                                                            Remove
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="accordion" id="accordion3">
+                                                                                {% for subrecipe3 in subrecipe2.children %}
+                                                                                    <div class="card border-0" id="card3">
+                                                                                        <div class="card-header card-header3" id="heading{{ subrecipe3.recipe_id }}">
+                                                                                            <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe3.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe3.recipe_id }}">
+                                                                                                <div class="recipe-name h2 m-0">
+                                                                                                    {{ subrecipe3.name }}
+                                                                                                </div>
+                                                                                            </button>
+                                                                                        </div>
+                                                                                        <div id="collapse{{ subrecipe3.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe3.recipe_id }}" data-parent="#accordion3">
+                                                                                            <div class="card-body p-0 mt-1">
+                                                                                                <div class="card-text">
+                                                                                                    <div>
+                                                                                                        {% if subrecipe3.ingredients %}
+                                                                                                            <ul class="list-group list-group-flush">
+                                                                                                                    <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                                                {% for ingredient in subrecipe3.ingredients %}
+                                                                                                                    <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                                                {% endfor %}
+                                                                                                            </ul>
+                                                                                                        {% endif %}
+                                                                                                        {% if subrecipe3.text %}
+                                                                                                            <ul class="list-group list-group-flush">
+                                                                                                                <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                                                <li class="list-group-item">{{ subrecipe3.text }}</li>
+                                                                                                            </ul>
+                                                                                                        {% endif %}
+                                                                                                        <span></span>
+                                                                                                    </div>
+                                                                                                    <div class="d-flex my-2 ml-3">
+                                                                                                        {% if subrecipe3.link %}
+                                                                                                            <button class="btn btn-outline-secondary m-1">
+                                                                                                                <a href="//{{ subrecipe3.link }}" rel="external">Web</a>
+                                                                                                            </button>
+                                                                                                        {% endif %}
+                                                                                                        <form action="/add" method="get">
+                                                                                                            <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe3.recipe_id }}"  type="submit">
+                                                                                                                Add
+                                                                                                            </button>
+                                                                                                        </form>
+                                                                                                        <form action="/update" method="get">
+                                                                                                            <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe3.recipe_id }}" type="submit">
+                                                                                                                Update
+                                                                                                            </button>
+                                                                                                        </form>
+                                                                                                        <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe3.recipe_id }}"  id="remove-button">
+                                                                                                                Remove
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <div class="accordion" id="accordion4">
+                                                                                                    {% for subrecipe4 in subrecipe3.children %}
+                                                                                                        <div class="card border-0" id="card4">
+                                                                                                            <div class="card-header card-header4" id="heading{{ subrecipe4.recipe_id }}">
+                                                                                                                <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe4.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe4.recipe_id }}">
+                                                                                                                    <div class="recipe-name h2 m-0">
+                                                                                                                        {{ subrecipe4.name }}
+                                                                                                                    </div>
+                                                                                                                </button>
+                                                                                                            </div>
+                                                                                                            <div id="collapse{{ subrecipe4.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe4.recipe_id }}" data-parent="#accordion4">
+                                                                                                                <div class="card-body p-0 mt-1">
+                                                                                                                    <div class="card-text">
+                                                                                                                        <div>
+                                                                                                                            {% if subrecipe4.ingredients %}
+                                                                                                                                <ul class="list-group list-group-flush">
+                                                                                                                                        <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                                                                    {% for ingredient in subrecipe4.ingredients %}
+                                                                                                                                        <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                                                                    {% endfor %}
+                                                                                                                                </ul>
+                                                                                                                            {% endif %}
+                                                                                                                            {% if subrecipe4.text %}
+                                                                                                                                <ul class="list-group list-group-flush">
+                                                                                                                                    <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                                                                    <li class="list-group-item">{{ subrecipe4.text }}</li>
+                                                                                                                                </ul>
+                                                                                                                            {% endif %}
+                                                                                                                            <span></span>
+                                                                                                                        </div>
+                                                                                                                        <div class="d-flex my-2 ml-3">
+                                                                                                                            {% if subrecipe4.link %}
+                                                                                                                                <button class="btn btn-outline-secondary m-1">
+                                                                                                                                    <a href="//{{ subrecipe4.link }}" rel="external">Web</a>
+                                                                                                                                </button>
+                                                                                                                            {% endif %}
+                                                                                                                            <form action="/add" method="get">
+                                                                                                                                <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe4.recipe_id }}"  type="submit">
+                                                                                                                                    Add
+                                                                                                                                </button>
+                                                                                                                            </form>
+                                                                                                                            <form action="/update" method="get">
+                                                                                                                                <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe4.recipe_id }}" type="submit">
+                                                                                                                                    Update
+                                                                                                                                </button>
+                                                                                                                            </form>
+                                                                                                                            <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe4.recipe_id }}"  id="remove-button">
+                                                                                                                                    Remove
+                                                                                                                            </button>
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                    <div class="accordion" id="accordion5">
+                                                                                                                        {% for subrecipe5 in subrecipe4.children %}
+                                                                                                                            <div class="card border-0" id="card5">
+                                                                                                                                <div class="card-header card-header5" id="heading{{ subrecipe5.recipe_id }}">
+                                                                                                                                    <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe5.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe5.recipe_id }}">
+                                                                                                                                        <div class="recipe-name h2 m-0">
+                                                                                                                                            {{ subrecipe5.name }}
+                                                                                                                                        </div>
+                                                                                                                                    </button>
+                                                                                                                                </div>
+                                                                                                                                <div id="collapse{{ subrecipe5.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe5.recipe_id }}" data-parent="#accordion5">
+                                                                                                                                    <div class="card-body p-0 mt-1">
+                                                                                                                                        <div class="card-text">
+                                                                                                                                            <div>
+                                                                                                                                                {% if subrecipe5.ingredients %}
+                                                                                                                                                    <ul class="list-group list-group-flush">
+                                                                                                                                                            <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                                                                                        {% for ingredient in subrecipe5.ingredients %}
+                                                                                                                                                            <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                                                                                        {% endfor %}
+                                                                                                                                                    </ul>
+                                                                                                                                                {% endif %}
+                                                                                                                                                {% if subrecipe5.text %}
+                                                                                                                                                    <ul class="list-group list-group-flush">
+                                                                                                                                                        <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                                                                                        <li class="list-group-item">{{ subrecipe5.text }}</li>
+                                                                                                                                                    </ul>
+                                                                                                                                                {% endif %}
+                                                                                                                                                <span></span>
+                                                                                                                                            </div>
+                                                                                                                                            <div class="d-flex my-2 ml-3">
+                                                                                                                                                {% if subrecipe5.link %}
+                                                                                                                                                    <button class="btn btn-outline-secondary m-1">
+                                                                                                                                                        <a href="//{{ subrecipe5.link }}" rel="external">Web</a>
+                                                                                                                                                    </button>
+                                                                                                                                                {% endif %}
+                                                                                                                                                <form action="/add" method="get">
+                                                                                                                                                    <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe5.recipe_id }}"  type="submit">
+                                                                                                                                                        Add
+                                                                                                                                                    </button>
+                                                                                                                                                </form>
+                                                                                                                                                <form action="/update" method="get">
+                                                                                                                                                    <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe5.recipe_id }}" type="submit">
+                                                                                                                                                        Update
+                                                                                                                                                    </button>
+                                                                                                                                                </form>
+                                                                                                                                                <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe5.recipe_id }}"  id="remove-button">
+                                                                                                                                                        Remove
+                                                                                                                                                </button>
+                                                                                                                                            </div>
+                                                                                                                                        </div>
+                                                                                                                                        <div class="accordion" id="accordion6">
+                                                                                                                                            {% for subrecipe6 in subrecipe5.children %}
+                                                                                                                                                <div class="card border-0" id="card6">
+                                                                                                                                                    <div class="card-header card-header6" id="heading{{ subrecipe6.recipe_id }}">
+                                                                                                                                                        <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe6.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe6.recipe_id }}">
+                                                                                                                                                            <div class="recipe-name h2 m-0">
+                                                                                                                                                                {{ subrecipe6.name }}
+                                                                                                                                                            </div>
+                                                                                                                                                        </button>
+                                                                                                                                                    </div>
+                                                                                                                                                    <div id="collapse{{ subrecipe6.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe6.recipe_id }}" data-parent="#accordion6">
+                                                                                                                                                        <div class="card-body p-0 mt-1">
+                                                                                                                                                            <div class="card-text">
+                                                                                                                                                                <div>
+                                                                                                                                                                    {% if subrecipe6.ingredients %}
+                                                                                                                                                                        <ul class="list-group list-group-flush">
+                                                                                                                                                                                <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                                                                                                            {% for ingredient in subrecipe6.ingredients %}
+                                                                                                                                                                                <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                                                                                                            {% endfor %}
+                                                                                                                                                                        </ul>
+                                                                                                                                                                    {% endif %}
+                                                                                                                                                                    {% if subrecipe6.text %}
+                                                                                                                                                                        <ul class="list-group list-group-flush">
+                                                                                                                                                                            <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                                                                                                            <li class="list-group-item">{{ subrecipe6.text }}</li>
+                                                                                                                                                                        </ul>
+                                                                                                                                                                    {% endif %}
+                                                                                                                                                                    <span></span>
+                                                                                                                                                                </div>
+                                                                                                                                                                <div class="d-flex my-2 ml-3">
+                                                                                                                                                                    {% if subrecipe6.link %}
+                                                                                                                                                                        <button class="btn btn-outline-secondary m-1">
+                                                                                                                                                                            <a href="//{{ subrecipe6.link }}" rel="external">Web</a>
+                                                                                                                                                                        </button>
+                                                                                                                                                                    {% endif %}
+                                                                                                                                                                    <form action="/add" method="get">
+                                                                                                                                                                        <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe6.recipe_id }}"  type="submit">
+                                                                                                                                                                            Add
+                                                                                                                                                                        </button>
+                                                                                                                                                                    </form>
+                                                                                                                                                                    <form action="/update" method="get">
+                                                                                                                                                                        <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe6.recipe_id }}" type="submit">
+                                                                                                                                                                            Update
+                                                                                                                                                                        </button>
+                                                                                                                                                                    </form>
+                                                                                                                                                                    <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe6.recipe_id }}"  id="remove-button">
+                                                                                                                                                                            Remove
+                                                                                                                                                                    </button>
+                                                                                                                                                                </div>
+                                                                                                                                                            </div>
+                                                                                                                                                            <div class="accordion" id="accordion7">
+                                                                                                                                                                {% for subrecipe7 in subrecipe6.children %}
+                                                                                                                                                                    <div class="card border-0" id="card7">
+                                                                                                                                                                        <div class="card-header card-header7" id="heading{{ subrecipe7.recipe_id }}">
+                                                                                                                                                                            <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe7.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe7.recipe_id }}">
+                                                                                                                                                                                <div class="recipe-name h2 m-0">
+                                                                                                                                                                                    {{ subrecipe7.name }}
+                                                                                                                                                                                </div>
+                                                                                                                                                                            </button>
+                                                                                                                                                                        </div>
+                                                                                                                                                                        <div id="collapse{{ subrecipe7.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe7.recipe_id }}" data-parent="#accordion7">
+                                                                                                                                                                            <div class="card-body p-0 mt-1">
+                                                                                                                                                                                <div class="card-text">
+                                                                                                                                                                                    <div>
+                                                                                                                                                                                        {% if subrecipe7.ingredients %}
+                                                                                                                                                                                            <ul class="list-group list-group-flush">
+                                                                                                                                                                                                    <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                                                                                                                                {% for ingredient in subrecipe7.ingredients %}
+                                                                                                                                                                                                    <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                                                                                                                                {% endfor %}
+                                                                                                                                                                                            </ul>
+                                                                                                                                                                                        {% endif %}
+                                                                                                                                                                                        {% if subrecipe7.text %}
+                                                                                                                                                                                            <ul class="list-group list-group-flush">
+                                                                                                                                                                                                <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                                                                                                                                <li class="list-group-item">{{ subrecipe7.text }}</li>
+                                                                                                                                                                                            </ul>
+                                                                                                                                                                                        {% endif %}
+                                                                                                                                                                                        <span></span>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                    <div class="d-flex my-2 ml-3">
+                                                                                                                                                                                        {% if subrecipe7.link %}
+                                                                                                                                                                                            <button class="btn btn-outline-secondary m-1">
+                                                                                                                                                                                                <a href="//{{ subrecipe7.link }}" rel="external">Web</a>
+                                                                                                                                                                                            </button>
+                                                                                                                                                                                        {% endif %}
+                                                                                                                                                                                        <form action="/add" method="get">
+                                                                                                                                                                                            <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe7.recipe_id }}"  type="submit">
+                                                                                                                                                                                                Add
+                                                                                                                                                                                            </button>
+                                                                                                                                                                                        </form>
+                                                                                                                                                                                        <form action="/update" method="get">
+                                                                                                                                                                                            <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe7.recipe_id }}" type="submit">
+                                                                                                                                                                                                Update
+                                                                                                                                                                                            </button>
+                                                                                                                                                                                        </form>
+                                                                                                                                                                                        <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe7.recipe_id }}"  id="remove-button">
+                                                                                                                                                                                                Remove
+                                                                                                                                                                                        </button>
+                                                                                                                                                                                    </div>
+                                                                                                                                                                                </div>
+                                                                                                                                                                                <div class="accordion" id="accordion8">
+                                                                                                                                                                                    {% for subrecipe8 in subrecipe7.children %}
+                                                                                                                                                                                        <div class="card border-0" id="card8">
+                                                                                                                                                                                            <div class="card-header card-header8" id="heading{{ subrecipe8.recipe_id }}">
+                                                                                                                                                                                                <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe8.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe8.recipe_id }}">
+                                                                                                                                                                                                    <div class="recipe-name h2 m-0">
+                                                                                                                                                                                                        {{ subrecipe8.name }}
+                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                </button>
+                                                                                                                                                                                            </div>
+                                                                                                                                                                                            <div id="collapse{{ subrecipe8.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe8.recipe_id }}" data-parent="#accordion8">
+                                                                                                                                                                                                <div class="card-body p-0 mt-1">
+                                                                                                                                                                                                    <div class="card-text">
+                                                                                                                                                                                                        <div>
+                                                                                                                                                                                                            {% if subrecipe8.ingredients %}
+                                                                                                                                                                                                                <ul class="list-group list-group-flush">
+                                                                                                                                                                                                                        <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                                                                                                                                                    {% for ingredient in subrecipe8.ingredients %}
+                                                                                                                                                                                                                        <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                                                                                                                                                    {% endfor %}
+                                                                                                                                                                                                                </ul>
+                                                                                                                                                                                                            {% endif %}
+                                                                                                                                                                                                            {% if subrecipe8.text %}
+                                                                                                                                                                                                                <ul class="list-group list-group-flush">
+                                                                                                                                                                                                                    <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                                                                                                                                                    <li class="list-group-item">{{ subrecipe8.text }}</li>
+                                                                                                                                                                                                                </ul>
+                                                                                                                                                                                                            {% endif %}
+                                                                                                                                                                                                            <span></span>
+                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                        <div class="d-flex my-2 ml-3">
+                                                                                                                                                                                                            {% if subrecipe8.link %}
+                                                                                                                                                                                                                <button class="btn btn-outline-secondary m-1">
+                                                                                                                                                                                                                    <a href="//{{ subrecipe8.link }}" rel="external">Web</a>
+                                                                                                                                                                                                                </button>
+                                                                                                                                                                                                            {% endif %}
+                                                                                                                                                                                                            <form action="/add" method="get">
+                                                                                                                                                                                                                <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe8.recipe_id }}"  type="submit">
+                                                                                                                                                                                                                    Add
+                                                                                                                                                                                                                </button>
+                                                                                                                                                                                                            </form>
+                                                                                                                                                                                                            <form action="/update" method="get">
+                                                                                                                                                                                                                <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe8.recipe_id }}" type="submit">
+                                                                                                                                                                                                                    Update
+                                                                                                                                                                                                                </button>
+                                                                                                                                                                                                            </form>
+                                                                                                                                                                                                            <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe8.recipe_id }}"  id="remove-button">
+                                                                                                                                                                                                                    Remove
+                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                    <div class="accordion" id="accordion9">
+                                                                                                                                                                                                        {% for subrecipe9 in subrecipe8.children %}
+                                                                                                                                                                                                            <div class="card border-0" id="card9">
+                                                                                                                                                                                                                <div class="card-header card-header9" id="heading{{ subrecipe9.recipe_id }}">
+                                                                                                                                                                                                                    <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe9.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe9.recipe_id }}">
+                                                                                                                                                                                                                        <div class="recipe-name h2 m-0">
+                                                                                                                                                                                                                            {{ subrecipe9.name }}
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                    </button>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                <div id="collapse{{ subrecipe9.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe9.recipe_id }}" data-parent="#accordion9">
+                                                                                                                                                                                                                    <div class="card-body p-0 mt-1">
+                                                                                                                                                                                                                        <div class="card-text">
+                                                                                                                                                                                                                            <div>
+                                                                                                                                                                                                                                {% if subrecipe9.ingredients %}
+                                                                                                                                                                                                                                    <ul class="list-group list-group-flush">
+                                                                                                                                                                                                                                            <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                                                                                                                                                                        {% for ingredient in subrecipe9.ingredients %}
+                                                                                                                                                                                                                                            <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                                                                                                                                                                        {% endfor %}
+                                                                                                                                                                                                                                    </ul>
+                                                                                                                                                                                                                                {% endif %}
+                                                                                                                                                                                                                                {% if subrecipe9.text %}
+                                                                                                                                                                                                                                    <ul class="list-group list-group-flush">
+                                                                                                                                                                                                                                        <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                                                                                                                                                                        <li class="list-group-item">{{ subrecipe9.text }}</li>
+                                                                                                                                                                                                                                    </ul>
+                                                                                                                                                                                                                                {% endif %}
+                                                                                                                                                                                                                                <span></span>
+                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                            <div class="d-flex my-2 ml-3">
+                                                                                                                                                                                                                                {% if subrecipe9.link %}
+                                                                                                                                                                                                                                    <button class="btn btn-outline-secondary m-1">
+                                                                                                                                                                                                                                        <a href="//{{ subrecipe9.link }}" rel="external">Web</a>
+                                                                                                                                                                                                                                    </button>
+                                                                                                                                                                                                                                {% endif %}
+                                                                                                                                                                                                                                <form action="/add" method="get">
+                                                                                                                                                                                                                                    <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe9.recipe_id }}"  type="submit">
+                                                                                                                                                                                                                                        Add
+                                                                                                                                                                                                                                    </button>
+                                                                                                                                                                                                                                </form>
+                                                                                                                                                                                                                                <form action="/update" method="get">
+                                                                                                                                                                                                                                    <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe9.recipe_id }}" type="submit">
+                                                                                                                                                                                                                                        Update
+                                                                                                                                                                                                                                    </button>
+                                                                                                                                                                                                                                </form>
+                                                                                                                                                                                                                                <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe9.recipe_id }}"  id="remove-button">
+                                                                                                                                                                                                                                        Remove
+                                                                                                                                                                                                                                </button>
+                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                        <div class="accordion" id="accordion10">
+                                                                                                                                                                                                                            {% for subrecipe10 in subrecipe9.children %}
+                                                                                                                                                                                                                                <div class="card border-0" id="card10">
+                                                                                                                                                                                                                                    <div class="card-header card-header10" id="heading{{ subrecipe10.recipe_id }}">
+                                                                                                                                                                                                                                        <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe10.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe10.recipe_id }}">
+                                                                                                                                                                                                                                            <div class="recipe-name h2 m-0">
+                                                                                                                                                                                                                                                {{ subrecipe10.name }}
+                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                    <div id="collapse{{ subrecipe10.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe10.recipe_id }}" data-parent="#accordion10">
+                                                                                                                                                                                                                                        <div class="card-body p-0 mt-1">
+                                                                                                                                                                                                                                            <div class="card-text">
+                                                                                                                                                                                                                                                <div>
+                                                                                                                                                                                                                                                    {% if subrecipe10.ingredients %}
+                                                                                                                                                                                                                                                        <ul class="list-group list-group-flush">
+                                                                                                                                                                                                                                                                <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                                                                                                                                                                                            {% for ingredient in subrecipe10.ingredients %}
+                                                                                                                                                                                                                                                                <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                                                                                                                                                                                            {% endfor %}
+                                                                                                                                                                                                                                                        </ul>
+                                                                                                                                                                                                                                                    {% endif %}
+                                                                                                                                                                                                                                                    {% if subrecipe10.text %}
+                                                                                                                                                                                                                                                        <ul class="list-group list-group-flush">
+                                                                                                                                                                                                                                                            <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                                                                                                                                                                                            <li class="list-group-item">{{ subrecipe10.text }}</li>
+                                                                                                                                                                                                                                                        </ul>
+                                                                                                                                                                                                                                                    {% endif %}
+                                                                                                                                                                                                                                                    <span></span>
+                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                <div class="d-flex my-2 ml-3">
+                                                                                                                                                                                                                                                    {% if subrecipe10.link %}
+                                                                                                                                                                                                                                                        <button class="btn btn-outline-secondary m-1">
+                                                                                                                                                                                                                                                            <a href="//{{ subrecipe10.link }}" rel="external">Web</a>
+                                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                                    {% endif %}
+                                                                                                                                                                                                                                                    <form action="/add" method="get">
+                                                                                                                                                                                                                                                        <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe10.recipe_id }}"  type="submit">
+                                                                                                                                                                                                                                                            Add
+                                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                                    </form>
+                                                                                                                                                                                                                                                    <form action="/update" method="get">
+                                                                                                                                                                                                                                                        <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe10.recipe_id }}" type="submit">
+                                                                                                                                                                                                                                                            Update
+                                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                                    </form>
+                                                                                                                                                                                                                                                    <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe10.recipe_id }}"  id="remove-button">
+                                                                                                                                                                                                                                                            Remove
+                                                                                                                                                                                                                                                    </button>
+                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                            <div class="accordion" id="accordion11">
+                                                                                                                                                                                                                                                {% for subrecipe11 in subrecipe10.children %}
+                                                                                                                                                                                                                                                    <div class="card border-0" id="card11">
+                                                                                                                                                                                                                                                        <div class="card-header card-header11" id="heading{{ subrecipe11.recipe_id }}">
+                                                                                                                                                                                                                                                            <button class="btn btn-link text-light p-0" type="button" data-toggle="collapse" data-target="#collapse{{ subrecipe11.recipe_id }}" aria-expanded="false" aria-controls="collapse{{ subrecipe11.recipe_id }}">
+                                                                                                                                                                                                                                                                <div class="recipe-name h2 m-0">
+                                                                                                                                                                                                                                                                    {{ subrecipe11.name }}
+                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                        <div id="collapse{{ subrecipe11.recipe_id }}" class="collapse" aria-labelledby="heading{{ subrecipe11.recipe_id }}" data-parent="#accordion11">
+                                                                                                                                                                                                                                                            <div class="card-body p-0 mt-1">
+                                                                                                                                                                                                                                                                <div class="card-text">
+                                                                                                                                                                                                                                                                    <div>
+                                                                                                                                                                                                                                                                        {% if subrecipe11.ingredients %}
+                                                                                                                                                                                                                                                                            <ul class="list-group list-group-flush">
+                                                                                                                                                                                                                                                                                    <li class="list-group-item h5 font-weight-bold">Ingredients</li>
+                                                                                                                                                                                                                                                                                {% for ingredient in subrecipe11.ingredients %}
+                                                                                                                                                                                                                                                                                    <li class="list-group-item">{{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient }}</li>
+                                                                                                                                                                                                                                                                                {% endfor %}
+                                                                                                                                                                                                                                                                            </ul>
+                                                                                                                                                                                                                                                                        {% endif %}
+                                                                                                                                                                                                                                                                        {% if subrecipe11.text %}
+                                                                                                                                                                                                                                                                            <ul class="list-group list-group-flush">
+                                                                                                                                                                                                                                                                                <li class="list-group-item h5 pt-2 font-weight-bold">Directions</li>
+                                                                                                                                                                                                                                                                                <li class="list-group-item">{{ subrecipe11.text }}</li>
+                                                                                                                                                                                                                                                                            </ul>
+                                                                                                                                                                                                                                                                        {% endif %}
+                                                                                                                                                                                                                                                                        <span></span>
+                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                    <div class="d-flex my-2 ml-3">
+                                                                                                                                                                                                                                                                        {% if subrecipe11.link %}
+                                                                                                                                                                                                                                                                            <button class="btn btn-outline-secondary m-1">
+                                                                                                                                                                                                                                                                                <a href="//{{ subrecipe11.link }}" rel="external">Web</a>
+                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                        {% endif %}
+                                                                                                                                                                                                                                                                        <form action="/add" method="get">
+                                                                                                                                                                                                                                                                            <button class="btn btn-outline-primary add-button m-1" name="add-button" value="{{ subrecipe11.recipe_id }}"  type="submit">
+                                                                                                                                                                                                                                                                                Add
+                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                        </form>
+                                                                                                                                                                                                                                                                        <form action="/update" method="get">
+                                                                                                                                                                                                                                                                            <button class="btn btn-outline-success m-1" name="update-button" value="{{ subrecipe11.recipe_id }}" type="submit">
+                                                                                                                                                                                                                                                                                Update
+                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                        </form>
+                                                                                                                                                                                                                                                                        <button class="btn btn-outline-danger remove-button m-1" name="remove-button" value="{{ subrecipe11.recipe_id }}"  id="remove-button">
+                                                                                                                                                                                                                                                                                Remove
+                                                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                {% endfor %}
+                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                            {% endfor %}
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                        {% endfor %}
+                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                </div>
+                                                                                                                                                                                            </div>
+                                                                                                                                                                                        </div>
+                                                                                                                                                                                    {% endfor %}
+                                                                                                                                                                                </div>
+                                                                                                                                                                            </div>
+                                                                                                                                                                        </div>
+                                                                                                                                                                    </div>
+                                                                                                                                                                {% endfor %}
+                                                                                                                                                            </div>
+                                                                                                                                                        </div>
+                                                                                                                                                    </div>
+                                                                                                                                                </div>
+                                                                                                                                            {% endfor %}
+                                                                                                                                        </div>
+                                                                                                                                    </div>
+                                                                                                                                </div>
+                                                                                                                            </div>
+                                                                                                                        {% endfor %}
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    {% endfor %}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                {% endfor %}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

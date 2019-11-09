@@ -1,0 +1,168 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Update
+{% endblock %}
+
+{% block main %}
+
+
+<script>
+$(function(){
+    var ingredientCount = JSON.parse({{ingredientCount|tojson|safe}});
+    var counter = ingredientCount;
+    var max_ingredients = JSON.parse({{max_ingredients|tojson|safe}});
+
+    if (ingredientCount > 0){
+        ShowIngredients(ingredientCount, max_ingredients);
+        ShowAllButtonHelpTextLink();
+    }
+
+    $('#recipe-name').change(function(){
+        var recipe_id = $(this).val();
+        $.getJSON($SCRIPT_ROOT + '/refill', {
+            recipe_id: `${recipe_id}`
+        }, function(data){
+                $('#text').text(data.recipe.text);
+                $('#link').val(data.recipe.link);
+                InsertIngredientInformation(data.ingredientCount, max_ingredients, data);
+                ShowIngredients(data.ingredientCount, max_ingredients);
+                counter = data.ingredientCount;
+            });
+            ShowAllButtonHelpTextLink();
+            return false;
+    });
+
+    $('#show-entry-button').click(function(){
+        $(`#ingredient-entry-${counter}`).show();
+        counter += 1;
+    });
+
+});
+
+    function ShowAllButtonHelpTextLink(){
+        $('#show-entry-button').show();
+        $('#ingredienthelp').show();
+        $('.hide-until-request').show();
+    }
+
+    function ShowIngredients(ingredientCount, max_ingredients){
+        for (i = 0; i < ingredientCount; i++){
+            $(`#ingredient-entry-${i}`).show();
+        }
+        for (j = ingredientCount; j < max_ingredients; j++){
+            $(`#ingredient-entry-${j}`).hide();
+        }
+        if (ingredientCount == 0){
+            $('#ingredienthelp').hide();
+        }
+    }
+
+    function InsertIngredientInformation(ingredientCount, max_ingredients, data){
+        for (i = 0; i < ingredientCount; i++){
+             $(`#amount${i}`).val(data.ingredients[i].amount);
+             $(`#unit${i}`).val(data.ingredients[i].unit);
+             $(`#ingredient${i}`).val(data.ingredients[i].ingredient);
+        }
+        for (j = ingredientCount; j < max_ingredients; j++){
+            $(`#amount${j}`).val('');
+            $(`#unit${j}`).val('');
+            $(`#ingredient${j}`).val('');
+        }
+    }
+
+</script>
+<div class="container">
+        <div class="row mt-3">
+            <div class="col">
+                <form method="post" action="/update" class="text-left">
+                    <div class="form-group">
+                      <label for="recipe-name" class="h5">Update Recipe</label><br>
+                      <select class="form-control" name="recipe-name" id="recipe-name">
+                        {% if requested_recipe.recipe_id == '-1' %}
+                          <option selected disabled value="-1">Name</option>
+                        {% else %}
+                            <option value="{{ requested_recipe.recipe_id }}">{{ requested_recipe.name }}</option>
+                        {% endif %}
+                        {% for recipe in recipes %}
+                          <option value='{{ recipe.recipe_id }}'>{{ recipe.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div id = "form-toggle">
+                        <label for="ingredients" class="h6 hide-until-request">Ingredients</label>
+                        {% for ingredient in range(max_ingredients) %}
+                        <div class="hide-until-request" id="ingredients">
+                            <div id="ingredients">
+                            <div id="ingredient-entry-{{ ingredient }}">
+                            <div class="form-row pb-1">
+                                <div class="col-3">
+                                        {% if ingredient < ingredientCount %}
+                                            <input value="{{ ingredients[ingredient].amount }}" step=".001" type="number" class="form-control" id="amount{{ ingredient }}" name="amount{{ ingredient }}" >
+                                        {% else %}
+                                            <input step=".001" type="number" class="form-control" id="amount{{ ingredient}}" name="amount{{ ingredient }}">
+                                        {% endif %}
+
+                                </div>
+                                <div class="col-3">
+                                    <select class="form-control" id="unit{{ ingredient }}" name="unit{{ ingredient }}">
+                                        {% if ingredient < ingredientCount %}
+                                            <option value="{{ ingredients[ingredient].unit }}" selected>{{ ingredients[ingredient].unit }}</option>
+                                        {% endif %}
+                                        {% for unit in units %}
+                                            <option value="{{ unit }}">{{ unit }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    {% if ingredient < ingredientCount %}
+                                        <input type="text" class="form-control" name="ingredient{{ ingredient }}" id="ingredient{{ ingredient }}" value='{{ ingredients[ingredient].ingredient }}'>
+                                    {% else %}
+                                        <input type="text" class="form-control" name="ingredient{{ ingredient }}" id="ingredient{{ ingredient }}">
+                                    {% endif %}
+                                </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        {% endfor %}
+                        </div>
+                        <div class="hide-until-request" id="ingredienthelp">
+                            <div class="form-row">
+                                <div class="col-3">
+                                  <small id="amounthelp" class="form-text text-muted">Amount (optional)</small>
+                                </div>
+                                <div class="col-3">
+                                  <small id="unithelp" class="form-text text-muted">Unit (optional)</small>
+                                </div>
+                                <div class="col-6">
+                                  <small id="namehelp" class="form-text text-muted">Name (required, if using)</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class= "hide-until-request">
+                            <div class="form-row py-2">
+                                <div class = "col">
+                                    <button class="btn btn-outline-primary add-button" type="button" id="show-entry-button">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hide-until-request">
+                            <div class="form-group">
+                              <label for="text">Instructions</label><br>
+                              <textarea class="form-control" rows="5" name="text" id="text" placeholder="optional">{{requested_recipe.text}}</textarea>
+                            </div>
+                            <div class="form-group">
+                              <label for="link">Link</label><br>
+                              <input type="text" class="form-control" name="link" id="link" placeholder="optional" value="{{requested_recipe.link}}" >
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add
+{% endblock %}
+
+{% block main %}
+  <script>
+
+    $(document).ready(function(){
+
+      //selectively show ingredient fields
+      var counter = 0;
+      var maxIngredients = JSON.parse({{ max_ingredients | tojson }});
+      $(`#ingredient-entry-${counter}`).show();
+      counter += 1;
+      $('#show-entry-button').click(function(){
+        $(`#ingredient-entry-${counter}`).show();
+        counter += 1;
+      });
+    });
+
+    //allow user to select recipe name or create recipe name - not both
+    $(function(){
+      $('#old-recipe-name').change(function(){
+        $('#hidden-option').hide();
+        $('#recipe-name').val('');
+        $('#recipe-name').removeAttr('placeholder');
+        $('#form-toggle').hide();
+        $('input').val('');
+        $('textarea').val('');
+        $('.unit').val('');
+        for (i=1; i<12; i++){
+          $(`#ingredient-entry-${i}`).hide();
+        }
+      });
+
+      $('#recipe-name').keypress(function(){
+        $('#hidden-option').show();
+        $('#old-recipe-name').val('');
+        $('#form-toggle').show();
+      })
+    });
+  </script>
+    <div class="container mt-4">
+      <div class="row">
+        <div class="col">
+          <form method="post" action="/add" class="text-left">
+            <div class="form-group">
+              <label for="recipe-name" class="h5">Add a Recipe</label><br>
+              <div class="form-row">
+                <div class="col">
+                  <input type="text" class="form-control" name="recipe-name" placeholder="Create" id="recipe-name">
+                </div>
+                <div class="col">
+                  <select class="form-control" name="old-recipe-name" id="old-recipe-name">
+                    <option disabled selected>Select</option>
+                    <option style="display:none" id="hidden-option" value=""></option>
+                    {% for recipe in recipes %}
+                      <option value='{{ recipe.recipe_id }}'>{{ recipe.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <small id="namehelp" class="form-text text-muted">Write a new recipe, or select one from the dropdown.</small>
+            </div>
+            <div class="form-group">
+              <label for="parent" class="h6">Parent Recipe</label><br>
+              <select class="form-control" name="parent">
+                  {% if parent_to_be %}
+                      <option selected value='{{ parent_to_be.recipe_id }}'>{{parent_to_be.name}}</option>
+                  {% else %}
+                      <option disabled selected></option>
+                  {% endif %}
+                  {% for recipe in recipes %}
+                        <option value='{{ recipe.recipe_id }}'>{{ recipe.name }}</option>
+                  {% endfor %}
+              </select>
+              <small id="recipehelp" class="form-text text-muted">Select the recipe it is a part of (optional).</small>
+            </div>
+            <div id="form-toggle">
+              <!-- start ingredient -->
+              <h6>Ingredients</h6>
+              {% for ingredient in range(max_ingredients) %}
+              <div class="form-row pt-1" id="ingredient-entry-{{ ingredient }}" style="display:none">
+                <div class="col-3">
+                  <input type="number" class="form-control" name="amount{{ ingredient }}" step=".001" min="0">
+                </div>
+                <div class="col-3">
+                  <select class="form-control unit" name="unit{{ ingredient }}">
+                    {% for unit in units %}
+                      <option value="{{ unit }}">{{ unit }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col">
+                  <input type="text" class="form-control" name="ingredient{{ ingredient }}">
+                </div>
+              </div>
+              {% endfor %}
+              <div class="form-row" id="ingredienthelp">
+                <div class="col-3">
+                  <small id="amounthelp" class="form-text text-muted">Amount (optional)</small>
+                </div>
+                <div class="col-3">
+                  <small id="unithelp" class="form-text text-muted">Unit (optional)</small>
+                </div>
+                <div class="col-6">
+                  <small id="namehelp" class="form-text text-muted">Name (required, if using)</small>
+                </div>
+              </div>
+
+              <!-- end ingredient -->
+              <div class="form-row py-2">
+                <div class = "col">
+                  <button class="btn btn-outline-primary add-button" type="button" id="show-entry-button">
+                      +
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="text">Instructions</label><br>
+                <textarea class="form-control" rows="5" name="text" placeholder="optional"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="link">Link</label><br>
+                <input type="text" class="form-control" name="link" placeholder="optional">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+
+{% endblock %}

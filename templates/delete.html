@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Delete
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <div class"row">
+        <div class="col mt-3">
+            <form method="post" action="/delete" class="text-left">
+                <div class="form-group">
+                    <label for="recipe-name" class="h5" placeholder="name">Delete Recipe</label><br>
+                    <select class="form-control" name="recipe-name" id="recipe-name">
+                        {% for recipe in recipes %}
+                            <option value="{{ recipe.recipe_id }}">{{ recipe.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <small class="form-text text-muted">This cannot be undone.</small>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
